@@ -19,8 +19,12 @@ public class User {
 
     public void addNote(Note note) {
         notes.add(note);
-//        note.setUser(this);
     }
+
+    public void delNote(Note note) {
+        notes.remove(note);
+    }
+
 
 
     public List<Note> getNotes() {

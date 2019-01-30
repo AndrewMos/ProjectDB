@@ -2,11 +2,9 @@ package Shop;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -15,8 +13,6 @@ public class MainController {
     @Autowired
     private UserRepository userRepository;
     private NoteRepository noteRepository;
-
-    private User curentUser = null;
 
 
     @GetMapping(path="/add")
@@ -29,17 +25,6 @@ public class MainController {
         userRepository.save(n);
         return "Saved";
     }
-
-//    @GetMapping(path="/login")
-//    public @ResponseBody String login (@RequestParam String email) {
-//
-//        User n = new User();
-//        n.setName(name);
-//        n.setEmail(email);
-//        userRepository.save(n);
-//        return "Saved";
-//    }
-
 
 
     @GetMapping(path="/addnote")
@@ -57,11 +42,51 @@ public class MainController {
 
         userRepository.save(u.get());
 
-        return "Saved to " + u.get().getName();
+        return "Saved " + header +  " to " + u.get().getName();
+    }
+
+    @GetMapping(path="/deluser")
+    public @ResponseBody String deleteUser (@RequestParam Integer user_id) {
+        Optional<User> u = Optional.of(new User());
+        u = userRepository.findById(user_id);
+        userRepository.delete(u.get());
+        return "Deleted";
+    }
+
+
+    @GetMapping(path="/delnote")
+    public @ResponseBody String deleteNote (@RequestParam Integer note_id) {
+
+        Iterable<User> users = userRepository.findAll();
+            for (User user : users) {
+                List<Note> notes = user.getNotes();
+                for (Note note : notes) {
+                    if (note.getId() == note_id) {
+                        user.delNote(note);
+                        userRepository.save(user);
+                        return "Deleted";
+                    }
+                }
+            }
+
+
+        return "Not Found";
     }
 
     @GetMapping(path="/all")
     public @ResponseBody Iterable<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    @GetMapping(path="/{user_id}/all")
+    public @ResponseBody Iterable<Note> getAllUsers(@PathVariable(value = "user_id") Integer user_id) {
+        Optional<User> u = Optional.of(new User());
+        u = userRepository.findById(user_id);
+
+        return u.get().getNotes();
+    }
+
+
+
+
 }
