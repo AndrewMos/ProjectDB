@@ -12,6 +12,7 @@ import java.util.Optional;
 public class MainController {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
     private NoteRepository noteRepository;
 
 
@@ -58,19 +59,36 @@ public class MainController {
     public @ResponseBody String deleteNote (@RequestParam Integer note_id) {
 
         Iterable<User> users = userRepository.findAll();
-            for (User user : users) {
-                List<Note> notes = user.getNotes();
-                for (Note note : notes) {
-                    if (note.getId() == note_id) {
-                        user.delNote(note);
-                        userRepository.save(user);
-                        return "Deleted";
-                    }
+        for (User user : users) {
+            List<Note> notes = user.getNotes();
+            for (Note note : notes) {
+                if (note.getId() == note_id) {
+                    user.delNote(note);
+                    userRepository.save(user);
+                    return "Deleted";
                 }
             }
+        }
 
 
         return "Not Found";
+    }
+
+    @GetMapping(path="/editnote")
+    public @ResponseBody String editNote (@RequestParam Integer note_id, @RequestParam String header, @RequestParam String text) {
+        Iterable<User> users = userRepository.findAll();
+        for (User user : users) {
+            List<Note> notes = user.getNotes();
+            for (Note note : notes) {
+                if (note.getId() == note_id) {
+                    note.setHeader(header);
+                    note.setText(text);
+                    userRepository.save(user);
+                    return "Edited";
+                }
+            }
+        }
+        return "Not found";
     }
 
     @GetMapping(path="/all")
@@ -78,12 +96,28 @@ public class MainController {
         return userRepository.findAll();
     }
 
-    @GetMapping(path="/{user_id}/all")
-    public @ResponseBody Iterable<Note> getAllUsers(@PathVariable(value = "user_id") Integer user_id) {
-        Optional<User> u = Optional.of(new User());
-        u = userRepository.findById(user_id);
+    @GetMapping(path="/stats")
+    public @ResponseBody Iterable<Note> getStats() {
+//        List<Integer> stats = null;
+//        stats.add(userRepository.findAll().hashCode());
 
-        return u.get().getNotes();
+
+        return noteRepository.findAll();
+    }
+
+    @GetMapping(path="/note/{note_id}")
+    public @ResponseBody Note getNote(@PathVariable(value = "note_id") Integer note_id) {
+
+        Iterable<User> users = userRepository.findAll();
+        for (User user : users) {
+            List<Note> notes = user.getNotes();
+            for (Note note : notes) {
+                if (note.getId() == note_id) {
+                    return note;
+                }
+            }
+        }
+        return null;
     }
 
 
