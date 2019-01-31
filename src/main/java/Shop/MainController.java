@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping(path="/demo")
+@RequestMapping(path="/api")
 public class MainController {
     @Autowired
     private UserRepository userRepository;
@@ -93,16 +93,13 @@ public class MainController {
 
     @GetMapping(path="/all")
     public @ResponseBody Iterable<User> getAllUsers() {
+
         return userRepository.findAll();
     }
 
     @GetMapping(path="/stats")
-    public @ResponseBody Iterable<Note> getStats() {
-//        List<Integer> stats = null;
-//        stats.add(userRepository.findAll().hashCode());
-
-
-        return noteRepository.findAll();
+    public @ResponseBody Integer getStats() {
+        return noteRepository.countNotes();
     }
 
     @GetMapping(path="/note/{note_id}")
